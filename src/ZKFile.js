@@ -1,4 +1,3 @@
-const BSON = require('bson');
 const MidiTrack = require('./MidiTrack');
 const Consts = require('./Consts');
 //const { Validator:JSONSchemaValidator } = require('jsonschema');
@@ -87,7 +86,7 @@ function process_event(e,d,bd){
 
 module.exports = class ZKFile{
     constructor(data,strict = false){
-        let zk = this.zk = BSON.deserialize(data);
+        let zk = this.zk = JSON.parse(Buffer.from(data).toString('utf8'));
         //if(strict && validator.validate(zk,zk_schema)) throw new TypeError('Validation failed');
         let { midi } = zk;
         

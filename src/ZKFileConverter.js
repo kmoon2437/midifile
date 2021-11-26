@@ -1,4 +1,3 @@
-const BSON = require('bson');
 const MidiFile = require('./MidiFile');
 const Consts = require('./Consts');
 
@@ -216,13 +215,12 @@ module.exports = class ZKFileConverter{
         });
 
         let json = {
-            $schema:'https://static.choyunjin.kr/codes/schema/json/zk/zk0.json',
             midi:{
                 header,global,data:blocks
             }
         };
         
-        return BSON.serialize(json);
+        return JSON.stringify(json);
         //return Buffer.from(JSON.stringify(json,0,4),'utf8');
     }
 }

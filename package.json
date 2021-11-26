@@ -9,7 +9,6 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bson": "^4.6.0",
     "midifile": "^2.0.0"
   }
 }
