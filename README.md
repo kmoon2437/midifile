@@ -22,7 +22,7 @@ file.header.duration_ms; // duration in ms
 file.tracks; // array
 file.tempo_events; // "set tempo" events
 
-let zk = fs.readFileSync('...'); // your zk file. it can be an ArrayBuffer or Uint8Array or nodejs Buffer
+let zk = fs.readFileSync('...'); // your zk file. it can be a string or nodejs Buffer
 
 let file2 = new ZKFile(zk); // ZKFile instance
 file2.header; // similar to MidiFile.header

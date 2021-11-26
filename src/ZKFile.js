@@ -86,7 +86,7 @@ function process_event(e,d,bd){
 
 module.exports = class ZKFile{
     constructor(data,strict = false){
-        let zk = this.zk = JSON.parse(Buffer.from(data).toString('utf8'));
+        let zk = this.zk = JSON.parse(data);
         //if(strict && validator.validate(zk,zk_schema)) throw new TypeError('Validation failed');
         let { midi } = zk;
         
