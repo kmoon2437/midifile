@@ -62,8 +62,8 @@ function process_meta_event(e,data,bd){
 
 function process_midi_event(e,d,bd){
     if(e.type != Consts.events.types.MIDI) return;
-    e.channel = d.c;
-    e.params = [d.p1,d.p2].map(a => Number.isNaN(a) ? 0 : a);
+    e.channel = bd.shift();
+    e.params = bd.map(a => Number.isNaN(a) ? 0 : a);
     return true;
 }
 
@@ -120,18 +120,18 @@ module.exports = class ZKFile{
         let global_playms = 0;
         let current_tempo_us = 500000;
         midi.global.events.forEach((event,i) => {
-            global_playtick += event.dt;
+            global_playtick += event.i[0];
             
             // smtpe 방식의 파일에서는 자동적으로 NaN이 됨
             let reso = this.header.ticks_per_beat ? (current_tempo_us / this.header.ticks_per_beat) : this.header.tick_resolution;
-            global_playms += reso * event.dt;
+            global_playms += reso * event.i[0];
             if(event.t != Consts.events.types.META){
                 if(strict) throw new TypeError('midi/sysex/escape events cannot be global events');
                 return;
             }
             let e = {
-                type:event.t,
-                subtype:event.st,
+                type:event.i[1],
+                subtype:event.i[2],
                 data_obj:event.d,
                 bytes:event.bd,
                 playms:global_playms
@@ -154,10 +154,10 @@ module.exports = class ZKFile{
                 let track = new MidiTrack(i,trackdata.meta);
                 let playtick = 0;
                 trackdata.events.forEach(event => {
-                    playtick += event.dt;
+                    playtick += event.i[0];
                     let e = {
-                        type:event.t,
-                        subtype:event.st,
+                        type:event.i[1],
+                        subtype:event.i[2],
                         data_obj:event.d,
                         bytes:event.bd
                     };

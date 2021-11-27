@@ -1,5 +1,4 @@
 {
-    $schema:'https://static.choyunjin.kr/codes/schema/json/zk/zk0.json', // 스키마 선언
     midi:{
         /**
         헤더...라고는 했지만 사실
@@ -13,7 +12,7 @@
         */
         header:{
             divtype:'tpb',
-            div0:'120'
+            div0:120
         },
         
         /*
@@ -32,13 +31,13 @@
                 copyright_notice:'(C) 2021~ choyunjin'
             },
             events:[{
-                dt:0,t:255,st:81,
+                i:[0,255,81],
                 d:{
                     type:'bpm',
                     tempo:150
                 }
             },{
-                dt:7800,t:255,st:81,
+                i:[7800,255,81],
                 d:{
                     type:'microsec',
                     tempo:250000
@@ -56,7 +55,6 @@
                 },
                 
                 /*
-                dt는 delta time, t는 type, st는 subtype
                 event type은 type과 subtype으로 나뉨(둘다 숫자)
                 type: meta(255),midi(8),sysex(240),escape(247)으로 총 4개
                 subtype: meta는 meta대로 midi는 midi대로 겁나 많음
@@ -65,7 +63,9 @@
                 */
                 events:[{
                     // meta 이벤트
-                    dt:0,t:255,st:0,
+                    // i는 information
+                    // 순서대로 delta time,type,subtype
+                    i:[0,255,0],
                     d:{ // 객체 d를 쓰는 경우(d는 data)
                         // sequence number(0) 일 따 들어가는 것들
                         msb:0, // msb
@@ -109,23 +109,20 @@
                     channel aftertouch(13)
                     pitch bend(14)
                     */
-                    dt:360,t:8,st:0,
-                    d:{
-                        // c는 channel(0부터 시작)
-                        // p1은 param2, p2는 param2
-                        // p2가 필요없으면 안넣거나 0을 넣으면 됨
-                        c:0,p1:0,p2:0
-                    }
+                    i:[360,8,0],
+                    // 순서대로 채널(0부터 시작),파라미터1,파라미터2
+                    // 파라미터2가 필요없으면 안 넣거나 0을 넣으면 됨
+                    bd:[0,0,0]
                 },{
                     // sysex 이벤트
                     // 내용물은 맨 앞에 0xf0(240)과
                     // 맨 뒤에 0xf7(247) 을 포함하지 않음
-                    dt:360,t:240,
+                    i:[360,240],
                     bd:[19,72,11,21,19,72,...]
                 },{
                     // escape 이벤트
                     // 내용물을 그대로 midi 신호로 보냄
-                    dt:360,t:247,
+                    i:[360,247],
                     bd:[19,72,11,21,19,72,...]
                 }]
             },{

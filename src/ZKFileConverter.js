@@ -18,7 +18,7 @@ function trackname2portnum(name){
 
 function new_meta_event(dt,st,data = {}){
     let event = {
-        dt,t:Consts.events.types.META,st
+        i:[dt,Consts.events.types.META,st]
     };
     if(data instanceof Array){
         event.bd = data;
@@ -31,24 +31,24 @@ function new_meta_event(dt,st,data = {}){
     return event;
 }
 
-function new_midi_event(dt,st,c,p1,p2){
+function new_midi_event(dt,st,ch,p1,p2){
     return {
-        dt,t:Consts.events.types.MIDI,st,
-        d:{ c,p1,p2 }
+        i:[dt,Consts.events.types.MIDI,st],
+        bd:[ch,p1,p2]
     };
 }
 
 function new_sysex_event(dt,bytes){
     bytes.pop();
     return {
-        dt,t:Consts.events.types.SYSEX,
+        i:[dt,Consts.events.types.SYSEX],
         bd:bytes
     };
 }
 
 function new_escape_event(dt,bytes){
     return {
-        dt,t:Consts.events.types.ESCAPE,
+        i:[dt,Consts.events.types.ESCAPE],
         bd:bytes
     };
 }
