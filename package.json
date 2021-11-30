@@ -1,7 +1,7 @@
 {
   "name": "zxe-midi-file",
   "version": "0.0.4-pareo0",
-  "description": "",
+  "description": "midi/zk file parser",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,6 +9,18 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "midifile": "^2.0.0"
-  }
+    "midifile": "^2.0.0",
+    "zxe-binaryxml": "^0.2.2-arisa0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kmoon2437/zxe-midi-file.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kmoon2437/zxe-midi-file/issues"
+  },
+  "homepage": "https://github.com/kmoon2437/zxe-midi-file#readme"
 }

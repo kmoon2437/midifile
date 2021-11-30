@@ -1,8 +1,8 @@
 # zxe-midi-file
 midi/zk file parser
 
-## About ZK file
-The zk file is a file format created for use in [zxe-karaoke-player](https://github.com/kmoon2437/zxe-karaoke-player). (Actually, It is just json)
+## About zk file
+The zk(**Z**XE**K**araoke) file is a file format created for use in [zxe-karaoke-player](https://github.com/kmoon2437/zxe-karaoke-player).
 
 ## Usage
 ```js

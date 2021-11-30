@@ -1,5 +1,6 @@
 const MidiFile = require('./MidiFile');
 const Consts = require('./Consts');
+const { BinaryXML } = require('zxe-binaryxml');
 
 function trackname2portnum(name){
     if(!name) return 0;
@@ -18,38 +19,39 @@ function trackname2portnum(name){
 
 function new_meta_event(dt,st,data = {}){
     let event = {
-        i:[dt,Consts.events.types.META,st]
+        dt,t:Consts.events.types.META,st
     };
     if(data instanceof Array){
-        event.bd = data;
+        event.d = {
+            d:Buffer.from(data)
+        };
     }else{
-        event.d = {};
-        for(let k in data){
-            event.d[k] = data[k];
-        }
+        event.d = {...data};
     }
     return event;
 }
 
-function new_midi_event(dt,st,ch,p1,p2){
+function new_midi_event(dt,st,c,p1,p2){
     return {
-        i:[dt,Consts.events.types.MIDI,st],
-        bd:[ch,p1,p2]
+        dt,t:Consts.events.types.MIDI,st,
+        d:{
+            c,p:Buffer.from([p1,p2])
+        }
     };
 }
 
 function new_sysex_event(dt,bytes){
     bytes.pop();
     return {
-        i:[dt,Consts.events.types.SYSEX],
-        bd:bytes
+        dt,t:Consts.events.types.SYSEX,
+        d:{ d:Buffer.from(bytes) }
     };
 }
 
 function new_escape_event(dt,bytes){
     return {
-        i:[dt,Consts.events.types.ESCAPE],
-        bd:bytes
+        dt,t:Consts.events.types.ESCAPE,
+        d:{ d:Buffer.from(bytes) }
     };
 }
 
@@ -167,6 +169,7 @@ module.exports = class ZKFileConverter{
             });
 
             let portnum = trackname2portnum(track2.meta.track_name);
+            //console.log(track2.meta.track_name,portnum);
             if(!blocks[portnum]) blocks[portnum] = [];
             blocks[portnum].push(track2);
         });
@@ -214,13 +217,117 @@ module.exports = class ZKFileConverter{
             }*/
         });
 
-        let json = {
+        /*let json = {
+            header:{
+                midi:header,
+            },
             midi:{
-                header,global,data:blocks
+                global,data:blocks
             }
+        };*/
+        
+        let zk = {
+            type:'element',
+            name:'zk',
+            elements:[]
         };
         
-        return JSON.stringify(json);
+        // 헤더
+        zk.elements.push({
+            type:'element',
+            name:'header',
+            elements:[{
+                type:'element',
+                name:'midi',
+                attributes:header
+            }]
+        });
+
+        let global_el = {
+            type:'element',
+            name:'global',
+            attributes:{},
+            elements:[]
+        };
+        for(let i in global.meta){
+            global_el.attributes['meta:'+i.replace(/_/g,'-')] = global.meta[i];
+        }
+        for(let event of global.events){
+            global_el.elements.push({
+                type:'element',
+                name:'e',
+                attributes:{
+                    dt:event.dt,
+                    t:event.t,
+                    st:event.st
+                },
+                elements:[{
+                    type:'element',
+                    name:'d',
+                    attributes:event.d
+                }]
+            });
+        }
+        
+        let data_el = {
+            type:'element',
+            name:'data',
+            elements:[]
+        };
+        for(let block of blocks){
+            let block_el = {
+                type:'element',
+                name:'block',
+                elements:[]
+            };
+            for(let track of block){
+                let track_el = {
+                    type:'element',
+                    name:'track',
+                    attributes:{},
+                    elements:[]
+                };
+                for(let i in track.meta){
+                    track_el.attributes['meta:'+i.replace(/_/g,'-')] = track.meta[i];
+                }
+                for(let event of track.events){
+                    track_el.elements.push({
+                        type:'element',
+                        name:'e',
+                        attributes:{
+                            dt:event.dt,
+                            t:event.t,
+                            st:event.st
+                        },
+                        elements:[{
+                            type:'element',
+                            name:'d',
+                            attributes:event.d
+                        }]
+                    });
+                }
+                block_el.elements.push(track_el);
+            }
+            data_el.elements.push(block_el);
+        }
+        
+        let mididata_el = {
+            type:'element',
+            name:'mididata',
+            elements:[global_el,data_el]
+        };
+        
+        zk.elements.push(mididata_el);
+        
+        let xml = {
+            declaration:{ attributes:{
+                version:'1.0',
+                encoding:'utf-8'
+            } },
+            elements:[zk]
+        };
+        
+        return BinaryXML.from_parsed_xml(xml);
         //return Buffer.from(JSON.stringify(json,0,4),'utf8');
     }
 }
