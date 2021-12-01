@@ -6,11 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "midi2zk": "bin/midi2zk.js"
+  },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "commander": "^8.3.0",
     "midifile": "^2.0.0",
-    "zxe-binaryxml": "^0.2.2-arisa0"
+    "zxe-binaryxml": "^0.3.2-arisa0"
   },
   "directories": {
     "test": "test"

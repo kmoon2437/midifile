@@ -56,7 +56,7 @@ function new_escape_event(dt,bytes){
 }
 
 module.exports = class ZKFileConverter{
-    static midi2zk(midi_buf){
+    static midi2zk(midi_buf,compress = 'raw'){
         let file = new MidiFile(midi_buf);
 
         let header = {
@@ -327,7 +327,7 @@ module.exports = class ZKFileConverter{
             elements:[zk]
         };
         
-        return BinaryXML.from_parsed_xml(xml);
+        return BinaryXML.from_parsed_xml(xml,{ compress });
         //return Buffer.from(JSON.stringify(json,0,4),'utf8');
     }
 }
