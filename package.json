@@ -1,6 +1,6 @@
 {
   "name": "zxe-midi-file",
-  "version": "0.2.1-pareo0",
+  "version": "0.2.2-pareo0",
   "description": "midi/zk file parser",
   "main": "index.js",
   "scripts": {
