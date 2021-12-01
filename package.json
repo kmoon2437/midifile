@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "midi2zk": "bin/midi2zk.js"
+    "midi2zk": "./cli/midi2zk.js"
   },
   "author": "",
   "license": "MIT",
