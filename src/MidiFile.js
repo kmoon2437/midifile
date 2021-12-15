@@ -40,6 +40,10 @@ module.exports = class MidiFile{
             let track = new MidiTrack(i);
             events.forEach((event) => {
                 playtick += event.delta;
+                
+                // 일부 미디파일에서 트랙 번호가 undefined로 되어있는 문제 수정
+                // 트랙번호가 없으면 0번트랙으로 처리
+                if(typeof event.track == 'undefined') event.track = 0;
                 if(event.track != i) return;
                 if(event.type == Consts.events.types.META){
                     // 어차피 event.data에 다 있음
