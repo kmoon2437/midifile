@@ -14,4 +14,13 @@ program
 let [ input,output ] = program.args;
 let opts = program.opts();
 
+if(!input){
+    console.error('Input file(first argument) required');
+    process.exit();
+}
+if(!output){
+    console.error('Output file(second argument) required');
+    process.exit();
+}
+
 fs.writeFileSync(output,ZKFileConverter.midi2zk(fs.readFileSync(input),opts.compress || 'raw'));
