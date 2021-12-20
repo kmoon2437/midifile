@@ -8,7 +8,7 @@
 3. d 태그는 map 구조의 데이터를 담는 태그로,
 js의 객체나 java의 Map 생각하면 편함
 -->
-<zk>
+<zk xmlns:meta="https://static.choyunjin.kr/xmlprefix/meta">
     <!-- 파일 전체의 정보를 담음 -->
     <header>
         <!-- 기존 zxel 파일의 헤더
@@ -47,8 +47,8 @@ js의 객체나 java의 Map 생각하면 편함
         time signature(88)
         key signature(89)
         구조는 밑에 data부분 참조
-        copyright notice 메타 이벤트는 meta:copyright-notice(문자열)로 대체 -->
-        <global meta:copyright-notice="(C) 2021~ choyunjin">
+        copyright notice 메타 이벤트는 meta:copyrightNotice(문자열)로 대체 -->
+        <global meta:copyrightNotice="(C) 2021~ choyunjin">
             <e dt="0" t="255" st="81">
                 <d type="bpm" tempo="150" />
             </e>
@@ -61,9 +61,9 @@ js의 객체나 java의 Map 생각하면 편함
         <data>
             <!-- block 1개 = 포트 1개 -->
             <block>
-                <!-- track name 메타 이벤트는 meta:track-name(문자열)으로 대체
-                instrument name 메타 이벤트는 meta:instrument-name(문자열)으로 대체 -->
-                <track meta:track-name="Track 1-1">
+                <!-- track name 메타 이벤트는 meta:trackName(문자열)으로 대체
+                instrument name 메타 이벤트는 meta:instrumentName(문자열)으로 대체 -->
+                <track meta:trackName="Track 1-1">
                     <!-- e는 event, dt는 delta time, t는 type, st는 subtype
                     데이터상으로 저 3개는 모두 정수형이어야 함
                     event type은 type과 subtype으로 나뉨(둘다 숫자)

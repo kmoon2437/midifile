@@ -4,20 +4,20 @@ const { BinaryXML } = require('zxe-binaryxml');
 
 function trackname2portnum(name){
     if(!name) return 0;
-    let is_num = false;
+    let isNum = false;
     let numstr = '';
     for(let c of name){
         if(isNaN(Number(c))){
-            if(is_num) return (isNaN(parseInt(numstr,10)) ? 1 : parseInt(numstr,10)) - 1;
+            if(isNum) return (isNaN(parseInt(numstr,10)) ? 1 : parseInt(numstr,10)) - 1;
             continue;
         }
-        is_num = true;
+        isNum = true;
         numstr += c;
     }
     return 0;
 }
 
-function new_meta_event(dt,st,data = {}){
+function newMetaEvent(dt,st,data = {}){
     let event = {
         dt,t:Consts.events.types.META,st
     };
@@ -31,7 +31,7 @@ function new_meta_event(dt,st,data = {}){
     return event;
 }
 
-function new_midi_event(dt,st,c,p1,p2){
+function newMidiEvent(dt,st,c,p1,p2){
     return {
         dt,t:Consts.events.types.MIDI,st,
         d:{
@@ -40,7 +40,7 @@ function new_midi_event(dt,st,c,p1,p2){
     };
 }
 
-function new_sysex_event(dt,bytes){
+function newSysexEvent(dt,bytes){
     bytes.pop();
     return {
         dt,t:Consts.events.types.SYSEX,
@@ -48,7 +48,7 @@ function new_sysex_event(dt,bytes){
     };
 }
 
-function new_escape_event(dt,bytes){
+function newEscapeEvent(dt,bytes){
     return {
         dt,t:Consts.events.types.ESCAPE,
         d:{ d:Buffer.from(bytes) }
@@ -56,19 +56,19 @@ function new_escape_event(dt,bytes){
 }
 
 module.exports = class ZKFileConverter{
-    static midi2zk(midi_buf,compress = 'raw'){
-        let file = new MidiFile(midi_buf);
+    static midi2zk(midiBuf,compress = 'raw'){
+        let file = new MidiFile(midiBuf);
 
         let header = {
-            divtype:file.header.ticks_per_beat ? 'tpb' : 'smtpe',
-            div0:file.header.ticks_per_beat || file.header.frames_per_second,
-            div1:file.header.ticks_per_beat ? undefined : file.header.ticks_per_frame
+            divtype:file.header.ticksPerBeat ? 'tpb' : 'smtpe',
+            div0:file.header.ticksPerBeat || file.header.framesPerSecond,
+            div1:file.header.ticksPerBeat ? undefined : file.header.ticksPerFrame
         };
         if(typeof header.div1 == 'undefined'){
             delete header.div1;
         }
 
-        let global_events = [];
+        let globalEvents = [];
         let global = {
             meta:{},events:[]
         };
@@ -76,17 +76,17 @@ module.exports = class ZKFileConverter{
         //let last_delta = 0;
         if(file.header.format != 1) throw new TypeError('Only format 1 is supported');
         file.tracks.forEach(track => {
-            let events_o = track.get_events();
+            let eventsObj = track.getEvents();
             let events = [];
-            for(let i in events_o){
-                let arr = [...events_o[i]];
+            for(let i in eventsObj){
+                let arr = [...eventsObj[i]];
                 arr.forEach(obj => {
                     obj.PLAYTICK = i;
                     events.push(obj);
                 });
             }
             events = events.sort((a,b) => a.PLAYTICK - b.PLAYTICK);
-            let track_events = [];
+            let trackEvents = [];
             let track2 = {
                 meta:{},events:[]
             };
@@ -94,20 +94,20 @@ module.exports = class ZKFileConverter{
                 if(event.type == Consts.events.types.META){
                     switch(event.subtype){
                         case Consts.events.subtypes.meta.COPYRIGHT_NOTICE:
-                            global.meta.copyright_notice = Buffer.from(event.data).toString('utf8');
+                            global.meta.copyrightNotice = Buffer.from(event.data).toString('utf8');
                         break;
                         case Consts.events.subtypes.meta.TRACK_NAME:
-                            track2.meta.track_name = Buffer.from(event.data).toString('utf8');
+                            track2.meta.trackName = Buffer.from(event.data).toString('utf8');
                         break;
                         case Consts.events.subtypes.meta.INSTRUMENT_NAME:
-                            track2.meta.instrument_name = Buffer.from(event.data).toString('utf8');
+                            track2.meta.instrumentName = Buffer.from(event.data).toString('utf8');
                         break;
                         case Consts.events.subtypes.meta.LYRICS:
                         case Consts.events.subtypes.meta.SET_TEMPO:
                         case Consts.events.subtypes.meta.SMTPE_OFFSET:
                         case Consts.events.subtypes.meta.TIME_SIGNATURE:
                         case Consts.events.subtypes.meta.KEY_SIGNATURE:
-                            global_events.push(event);
+                            globalEvents.push(event);
                         break;
                         /**
                         case Consts.events.subtypes.meta.SEQUENCE_NUMBER:
@@ -119,23 +119,23 @@ module.exports = class ZKFileConverter{
                         case Consts.events.subtypes.meta.SEQUENCER_SPECIFIC:
                          */
                         default:
-                            track_events.push(event);
+                            trackEvents.push(event);
                         break;
                     }
                 }else{
-                    track_events.push(event);
+                    trackEvents.push(event);
                 }
             });
 
             /**
              * delta time 방식으로 변환
              */
-            track_events.forEach((event,i) => {
-                let dt = parseInt(track_events[i-1] ? event.PLAYTICK-track_events[i-1].PLAYTICK : event.PLAYTICK,10);
+            trackEvents.forEach((event,i) => {
+                let dt = parseInt(trackEvents[i-1] ? event.PLAYTICK-trackEvents[i-1].PLAYTICK : event.PLAYTICK,10);
                 if(event.type == Consts.events.types.META){
                     switch(event.subtype){
                         case Consts.events.subtypes.meta.SEQUENCE_NUMBER:
-                            track2.events.push(new_meta_event(dt,event.subtype,{
+                            track2.events.push(newMetaEvent(dt,event.subtype,{
                                 msb:event.msb,
                                 lsb:event.lsb
                             }));
@@ -143,54 +143,54 @@ module.exports = class ZKFileConverter{
                         case Consts.events.subtypes.meta.TEXT:
                         case Consts.events.subtypes.meta.MARKER:
                         case Consts.events.subtypes.meta.CUE_POINT:
-                            track2.events.push(new_meta_event(dt,event.subtype,{
+                            track2.events.push(newMetaEvent(dt,event.subtype,{
                                 txt:Buffer.from(event.data).toString('utf8')
                             }));
                         break;
                         case Consts.events.subtypes.meta.CHANNEL_PREFIX:
-                            track2.events.push(new_meta_event(dt,event.subtype,{
+                            track2.events.push(newMetaEvent(dt,event.subtype,{
                                 prefix:event.prefix
                             }));
                         break;
                         case Consts.events.subtypes.meta.END_OF_TRACK:
-                            track2.events.push(new_meta_event(dt,event.subtype));
+                            track2.events.push(newMetaEvent(dt,event.subtype));
                         break;
                         case Consts.events.subtypes.meta.SEQUENCER_SPECIFIC:
-                            track2.events.push(new_meta_event(dt,event.subtype,event.data));
+                            track2.events.push(newMetaEvent(dt,event.subtype,event.data));
                         break;
                     }
                 }else if(event.type == Consts.events.types.MIDI){
-                    track2.events.push(new_midi_event(dt,event.subtype,event.channel,...event.params));
+                    track2.events.push(newMidiEvent(dt,event.subtype,event.channel,...event.params));
                 }else if(event.type == Consts.events.types.SYSEX){
-                    track2.events.push(new_sysex_event(dt,event.data));
+                    track2.events.push(newSysexEvent(dt,event.data));
                 }else if(event.type == Consts.events.types.ESCAPE){
-                    track2.events.push(new_escape_event(dt,event.data));
+                    track2.events.push(newEscapeEvent(dt,event.data));
                 }
             });
 
-            let portnum = trackname2portnum(track2.meta.track_name);
+            let portnum = trackname2portnum(track2.meta.trackName);
             //console.log(track2.meta.track_name,portnum);
             if(!blocks[portnum]) blocks[portnum] = [];
             blocks[portnum].push(track2);
         });
 
-        global_events.forEach((event,i) => {
-            let dt = parseInt(global_events[i-1] ? event.PLAYTICK-global_events[i-1].PLAYTICK : event.PLAYTICK,10);
+        globalEvents.forEach((event,i) => {
+            let dt = parseInt(globalEvents[i-1] ? event.PLAYTICK-globalEvents[i-1].PLAYTICK : event.PLAYTICK,10);
             if(event.type == Consts.events.types.META){
                 switch(event.subtype){
                     case Consts.events.subtypes.meta.LYRICS:
-                        global.events.push(new_meta_event(dt,event.subtype,{
+                        global.events.push(newMetaEvent(dt,event.subtype,{
                             txt:Buffer.from(event.data).toString('utf8')
                         }));
                     break;
                     case Consts.events.subtypes.meta.SET_TEMPO:
-                        global.events.push(new_meta_event(dt,event.subtype,{
+                        global.events.push(newMetaEvent(dt,event.subtype,{
                             type:'microsec',
                             tempo:event.tempo
                         }));
                     break;
                     case Consts.events.subtypes.meta.SMTPE_OFFSET:
-                        global.events.push(new_meta_event(dt,event.subtype,[
+                        global.events.push(newMetaEvent(dt,event.subtype,[
                             event.hour,
                             event.minutes,
                             event.seconds,
@@ -199,10 +199,10 @@ module.exports = class ZKFileConverter{
                         ]));
                     break;
                     case Consts.events.subtypes.meta.TIME_SIGNATURE:{
-                        global.events.push(new_meta_event(dt,event.subtype,event.data));
+                        global.events.push(newMetaEvent(dt,event.subtype,event.data));
                     }break;
                     case Consts.events.subtypes.meta.KEY_SIGNATURE:
-                        global.events.push(new_meta_event(dt,event.subtype,{
+                        global.events.push(newMetaEvent(dt,event.subtype,{
                             key:event.key,
                             min:!event.scale
                         }));
@@ -229,6 +229,9 @@ module.exports = class ZKFileConverter{
         let zk = {
             type:'element',
             name:'zk',
+            attributes:{
+                'xmlns:meta':'https://static.choyunjin.kr/xmlprefix/meta'
+            },
             elements:[]
         };
         
@@ -243,17 +246,17 @@ module.exports = class ZKFileConverter{
             }]
         });
 
-        let global_el = {
+        let globalEl = {
             type:'element',
             name:'global',
             attributes:{},
             elements:[]
         };
         for(let i in global.meta){
-            global_el.attributes['meta:'+i.replace(/_/g,'-')] = global.meta[i];
+            globalEl.attributes['meta:'+i] = global.meta[i];
         }
         for(let event of global.events){
-            global_el.elements.push({
+            globalEl.elements.push({
                 type:'element',
                 name:'e',
                 attributes:{
@@ -269,29 +272,29 @@ module.exports = class ZKFileConverter{
             });
         }
         
-        let data_el = {
+        let dataEl = {
             type:'element',
             name:'data',
             elements:[]
         };
         for(let block of blocks){
-            let block_el = {
+            let blockEl = {
                 type:'element',
                 name:'block',
                 elements:[]
             };
             for(let track of block){
-                let track_el = {
+                let trackEl = {
                     type:'element',
                     name:'track',
                     attributes:{},
                     elements:[]
                 };
                 for(let i in track.meta){
-                    track_el.attributes['meta:'+i.replace(/_/g,'-')] = track.meta[i];
+                    trackEl.attributes['meta:'+i] = track.meta[i];
                 }
                 for(let event of track.events){
-                    track_el.elements.push({
+                    trackEl.elements.push({
                         type:'element',
                         name:'e',
                         attributes:{
@@ -306,18 +309,18 @@ module.exports = class ZKFileConverter{
                         }]
                     });
                 }
-                block_el.elements.push(track_el);
+                blockEl.elements.push(trackEl);
             }
-            data_el.elements.push(block_el);
+            dataEl.elements.push(blockEl);
         }
         
-        let mididata_el = {
+        let mididataEl = {
             type:'element',
             name:'mididata',
-            elements:[global_el,data_el]
+            elements:[globalEl,dataEl]
         };
         
-        zk.elements.push(mididata_el);
+        zk.elements.push(mididataEl);
         
         let xml = {
             declaration:{ attributes:{
@@ -327,7 +330,7 @@ module.exports = class ZKFileConverter{
             elements:[zk]
         };
         
-        return BinaryXML.from_parsed_xml(xml,{ compress });
+        return BinaryXML.fromParsedXML(xml,{ compress });
         //return Buffer.from(JSON.stringify(json,0,4),'utf8');
     }
 }

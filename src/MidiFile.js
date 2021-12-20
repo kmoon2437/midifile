@@ -13,30 +13,30 @@ module.exports = class MidiFile{
         
         this.header = {
             format:this.d.header.getFormat(),
-            ticks_per_beat:null,
-            frames_per_second:null,
-            ticks_per_frame:null,
-            tick_resolution:this.d.header.getTickResolution(),
-            tracks_count:this.d.header.getTracksCount(),
+            ticksPerBeat:null,
+            framesPerSecond:null,
+            ticksPerFrame:null,
+            tickResolution:this.d.header.getTickResolution(),
+            tracksCount:this.d.header.getTracksCount(),
         };
         
         if(this.d.header.getTimeDivision() == MidiFileData.Header.TICKS_PER_BEAT){
-            this.header.ticks_per_beat = this.d.header.getTicksPerBeat();
+            this.header.ticksPerBeat = this.d.header.getTicksPerBeat();
         }else{
-            this.header.frames_per_second = this.d.header.getSMTPEFrames();
-            this.header.ticks_per_frame = this.d.header.getTicksPerFrame();
+            this.header.framesPerSecond = this.d.header.getSMTPEFrames();
+            this.header.ticksPerFrame = this.d.header.getTicksPerFrame();
         }
         
         this.tracks = [];
         let endtimes = [];
-        let endtimes_ms = [];
+        let endtimesMs = [];
         let events = this.d.getEvents();
-        this.tempo_events = new MidiTrack();
-        for(let i = 0;i < this.header.tracks_count;i++){
+        this.tempoEvents = new MidiTrack();
+        for(let i = 0;i < this.header.tracksCount;i++){
             let playtick = 0;
             let playms = 0;
-            let last_midi_event = 0;
-            let last_midi_event_ms = 0;
+            let lastMidiEvent = 0;
+            let lastMidiEventMs = 0;
             let track = new MidiTrack(i);
             events.forEach((event) => {
                 playtick += event.delta;
@@ -59,38 +59,38 @@ module.exports = class MidiFile{
                     delete event.param1;
                     delete event.param2;
                 }
-                track.add_event(playtick,event);
+                track.addEvent(playtick,event);
                 if(event.type != Consts.events.types.META){
-                    last_midi_event = playtick;
-                    last_midi_event_ms = event.playTime;
+                    lastMidiEvent = playtick;
+                    lastMidiEventMs = event.playTime;
                 }
                 if(event.type == Consts.events.types.META && event.subtype == Consts.events.subtypes.meta.SET_TEMPO){
-                    this.tempo_events.add_event(playtick,event);
+                    this.tempoEvents.addEvent(playtick,event);
                     
                     // 모든 midi 이벤트가 끝나고도 tempo 이벤트가 남아있는 경우
-                    // duration_ms와 duration_tick에 차이가 생기는 것을 방지
-                    last_midi_event = playtick;
-                    last_midi_event_ms = event.playTime;
+                    // durationMs와 durationTick에 차이가 생기는 것을 방지
+                    lastMidiEvent = playtick;
+                    lastMidiEventMs = event.playTime;
                 }
             });
             this.tracks.push(track);
-            endtimes.push(unsafe ? last_midi_event : playtick);
-            endtimes_ms.push(unsafe ? last_midi_event_ms : playms);
+            endtimes.push(unsafe ? lastMidiEvent : playtick);
+            endtimesMs.push(unsafe ? lastMidiEventMs : playms);
         }
 
-        this.header.duration_tick = Math.max(...endtimes);
-        this.header.duration_ms = Math.round(Math.max(...endtimes_ms));
+        this.header.durationTick = Math.max(...endtimes);
+        this.header.durationMs = Math.round(Math.max(...endtimesMs));
         
-        // duration_tick에도 정확히 3초를 추가
+        // durationTick에도 정확히 3초를 추가
         if(unsafe){
-            this.header.duration_ms += 3000;
-            if(this.header.ticks_per_beat){
-                let tevents = this.tempo_events.get_events();
+            this.header.durationMs += 3000;
+            if(this.header.ticksPerBeat){
+                let tevents = this.tempoEvents.getEvents();
                 tevents = tevents[Math.max(...Object.keys(tevents))];
-                let last_tempo = tevents[tevents.length-1] ? tevents[tevents.length-1].tempo : 500000;
-                this.header.duration_tick += Math.round(DURATION_TAIL_MS*1000/last_tempo*this.header.ticks_per_beat);
+                let lastTempo = tevents[tevents.length-1] ? tevents[tevents.length-1].tempo : 500000;
+                this.header.durationTick += Math.round(DURATION_TAIL_MS*1000/lastTempo*this.header.ticksPerBeat);
             }else{
-                this.header.duration_tick += Math.round(DURATION_TAIL_MS*1000/this.header.tick_resolution);
+                this.header.durationTick += Math.round(DURATION_TAIL_MS*1000/this.header.tickResolution);
             }
         }
     }

@@ -1,16 +1,16 @@
 module.exports = class MidiTrack{
-    constructor(track_no,meta){
-        this.track_no = track_no;
+    constructor(trackNo,meta){
+        this.trackNo = trackNo;
         this.meta = meta;
         this.events = {};
     }
     
-    add_event(time,event){
+    addEvent(time,event){
         if(!this.events[time]) this.events[time] = [];
         this.events[time].push(event);
     }
 
-    get_events(){
+    getEvents(){
         return this.events;
     }
 }

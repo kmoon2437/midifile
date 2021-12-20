@@ -14,7 +14,7 @@
   "dependencies": {
     "commander": "^8.3.0",
     "midifile": "^2.0.0",
-    "zxe-binaryxml": "^0.3.2-arisa0"
+    "zxe-binaryxml": "^1.0.0-arisa0"
   },
   "directories": {
     "test": "test"

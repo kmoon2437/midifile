@@ -8,7 +8,7 @@ const DURATION_TAIL_MS = 3000;
 //const validator = new JSONSchemaValidator();
 //const zk_schema = require('./zk_schema');
 
-function process_meta_event(e,data){
+function processMetaEvent(e,data){
     if(e.type != Consts.events.types.META) return;
     switch(e.subtype){
         case Consts.events.subtypes.meta.SEQUENCE_NUMBER:
@@ -60,14 +60,14 @@ function process_meta_event(e,data){
     return true;
 }
 
-function process_midi_event(e,data){
+function processMidiEvent(e,data){
     if(e.type != Consts.events.types.MIDI) return;
     e.channel = data.c;
     e.params = [...data.p];
     return true;
 }
 
-function process_midi_system_event(e,data){
+function processMidiSystemEvent(e,data){
     if(
         e.type != Consts.events.types.SYSEX
         && e.type != Consts.events.types.ESCAPE
@@ -77,29 +77,29 @@ function process_midi_system_event(e,data){
     return true;
 }
 
-function process_event(e,d){
+function processEvent(e,d){
     let s;
-    if(s = process_meta_event(e,d)) return;
-    if(s = process_midi_event(e,d)) return;
-    if(s = process_midi_system_event(e,d)) return;
+    if(s = processMetaEvent(e,d)) return;
+    if(s = processMidiEvent(e,d)) return;
+    if(s = processMidiSystemEvent(e,d)) return;
 }
 
 module.exports = class ZKFile{
     constructor(data,strict = false){
-        let zk = this.zk = BinaryXML.to_parsed_xml(data);
+        let zk = this.zk = BinaryXML.toParsedXML(data);
         //if(strict && validator.validate(zk,zk_schema)) throw new TypeError('Validation failed');
         
         // 우선 다루기 편하게 변환
         /*let { elements:[{
             attributes:header
-        },global_el,data_el] } = zk;*/
+        },globalEl,dataEl] } = zk;*/
         
-        let { elements:zk_els } = zk;
-        let zk_el = zk_els.filter(el => {
+        let { elements:zkEls } = zk;
+        let zkEl = zkEls.filter(el => {
             return el.type == 'element' && el.name == 'zk';
         })[0];
-        if(!zk_el) throw new Error('there is no "zk" element');
-        let header = zk_el.elements.filter(el => {
+        if(!zkEl) throw new Error('there is no "zk" element');
+        let header = zkEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'header';
         });
         if(!header.length) throw new Error('there is no "header" element'); 
@@ -109,31 +109,31 @@ module.exports = class ZKFile{
         if(!header.length) throw new Error('there is no "midi" element in the "header" element');
         header = header[0].attributes;
         
-        let mididata_el = zk_el.elements.filter(el => {
+        let mididataEl = zkEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'mididata';
         })[0];
-        if(!mididata_el) throw new Error('there is no "mididata" element');
+        if(!mididataEl) throw new Error('there is no "mididata" element');
         
-        let global_el = mididata_el.elements.filter(el => {
+        let globalEl = mididataEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'global';
         })[0];
-        if(!global_el) throw new Error('there is no "global" element');
+        if(!globalEl) throw new Error('there is no "global" element');
         
         let global = {
             meta:(() => {
                 let d = {};
-                for(let i in global_el.attributes){
+                for(let i in globalEl.attributes){
                     if(!i.startsWith('meta:')) continue;
-                    d[i.slice(5).replace(/-/g,'_')] = global_el.attributes[i];
+                    d[i.slice(5).replace(/-/g,'_')] = globalEl.attributes[i];
                 };
                 return d;
             })(),
-            events:global_el.elements.filter(el => {
+            events:globalEl.elements.filter(el => {
                 return el.type == 'element' && el.name == 'e';
-            }).map(event_el => {
+            }).map(eventEl => {
                 // data 처리
                 let data = {};
-                event_el.elements.filter(el => {
+                eventEl.elements.filter(el => {
                     return el.type == 'element' && el.name == 'd';
                 }).forEach(d => {
                     for(let i in d.attributes){
@@ -142,19 +142,19 @@ module.exports = class ZKFile{
                 });
 
                 return {
-                    delta:event_el.attributes.dt,
-                    type:event_el.attributes.t,
-                    subtype:event_el.attributes.st,
-                    data_obj:data
+                    delta:eventEl.attributes.dt,
+                    type:eventEl.attributes.t,
+                    subtype:eventEl.attributes.st,
+                    dataObj:data
                 };
             })
         };
         
-        let data_el = mididata_el.elements.filter(el => {
+        let dataEl = mididataEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'data';
         })[0];
-        if(!data_el) throw new Error('there is no "data" element');
-        let blocks = data_el.elements.filter(el => {
+        if(!dataEl) throw new Error('there is no "data" element');
+        let blocks = dataEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'block';
         }).map(block => {
             return block.elements.filter(el => {
@@ -163,18 +163,18 @@ module.exports = class ZKFile{
                 return {
                     meta:(() => {
                         let d = {};
-                        for(let i in global_el.attributes){
+                        for(let i in globalEl.attributes){
                             if(!i.startsWith('meta:')) continue;
-                            d[i.slice(5).replace(/-/g,'_')] = global_el.attributes[i];
+                            d[i.slice(5).replace(/-/g,'_')] = globalEl.attributes[i];
                         };
                         return d;
                     })(),
                     events:track.elements.filter(el => {
                         return el.type == 'element' && el.name == 'e';
-                    }).map(event_el => {
+                    }).map(eventEl => {
                         // data 처리
                         let data = {};
-                        event_el.elements.filter(el => {
+                        eventEl.elements.filter(el => {
                             return el.type == 'element' && el.name == 'd';
                         }).forEach(d => {
                             for(let i in d.attributes){
@@ -183,10 +183,10 @@ module.exports = class ZKFile{
                         });
     
                         return {
-                            delta:event_el.attributes.dt,
-                            type:event_el.attributes.t,
-                            subtype:event_el.attributes.st,
-                            data_obj:data
+                            delta:eventEl.attributes.dt,
+                            type:eventEl.attributes.t,
+                            subtype:eventEl.attributes.st,
+                            dataObj:data
                         };
                     })
                 }
@@ -198,8 +198,8 @@ module.exports = class ZKFile{
         // 헤더 처리
         this.header = {
             format:1,
-            ticks_per_beat:null,
-            tick_resolution:null
+            ticksPerBeat:null,
+            tickResolution:null
         };
         
         // division 처리
@@ -207,48 +207,48 @@ module.exports = class ZKFile{
             case 'tpb':
                 // ticks per beat
                 // 이 방식일때는 tick resolution을 사용하지 않는걸 강력히 권장
-                this.header.ticks_per_beat = header.div0;
-                this.header.tick_resolution = 500000 / this.header.ticks_per_beat;
+                this.header.ticksPerBeat = header.div0;
+                this.header.tickResolution = 500000 / this.header.ticksPerBeat;
             break;
             case 'smtpe':
                 // smtpe(초단위로 계산하는 방식)
                 // 따라서 템포의 영향을 받지 않음
-                this.header.tick_resolution = 1000000 / (header.div0 * header.div1);
+                this.header.tickResolution = 1000000 / (header.div0 * header.div1);
             break;
         }
 
         // 전역 meta 이벤트 처리
-        this.global_events = new MidiTrack(global.meta);
-        this.tempo_events = new MidiTrack(global.meta);
-        let global_playtick = 0;
-        let global_playms = 0;
-        let current_tempo_us = 500000;
+        this.globalEvents = new MidiTrack(global.meta);
+        this.tempoEvents = new MidiTrack(global.meta);
+        let globalPlaytick = 0;
+        let globalPlayms = 0;
+        let currentTempoUs = 500000;
         global.events.forEach(event => {
-            global_playtick += event.delta;
+            globalPlaytick += event.delta;
             
             // smtpe 방식의 파일에서는 자동적으로 NaN이 됨
-            let reso = this.header.ticks_per_beat ? (current_tempo_us / this.header.ticks_per_beat) : this.header.tick_resolution;
-            global_playms += (reso * event.delta)/1000;
+            let reso = this.header.ticksPerBeat ? (currentTempoUs / this.header.ticksPerBeat) : this.header.tickResolution;
+            globalPlayms += (reso * event.delta)/1000;
             if(event.type != Consts.events.types.META){
                 if(strict) throw new TypeError('midi/sysex/escape events cannot be global events');
                 return;
             }
             let e = {
                 ...event,
-                playms:global_playms
+                playms:globalPlayms
             };
-            process_meta_event(e,event.data_obj);
+            processMetaEvent(e,event.dataObj);
             if(e.subtype == Consts.events.subtypes.meta.SET_TEMPO){
-                current_tempo_us = e.tempo;
-                this.tempo_events.add_event(global_playtick,e);
+                currentTempoUs = e.tempo;
+                this.tempoEvents.addEvent(globalPlaytick,e);
             }else{
-                this.global_events.add_event(global_playtick,e);
+                this.globalEvents.addEvent(globalPlaytick,e);
             }
         });
         
         // 개별 이벤트 처리
         this.ports = [];
-        let playtick_a = [global_playtick];
+        let playtickArr = [globalPlaytick];
         blocks.forEach(data => {
             let tracks = [];
             data.forEach((trackdata,i) => {
@@ -257,28 +257,28 @@ module.exports = class ZKFile{
                 trackdata.events.forEach(event => {
                     playtick += event.delta;
                     let e = {...event};
-                    process_event(e,event.data_obj);
-                    track.add_event(playtick,e);
+                    processEvent(e,event.dataObj);
+                    track.addEvent(playtick,e);
                 });
-                playtick_a.push(playtick);
+                playtickArr.push(playtick);
                 tracks.push(track);
             });
             this.ports.push(tracks);
         });
 
         // duration = 마지막 midi 또는 global 이벤트 + 3초
-        this.header.duration_tick = Math.max(...playtick_a);
-        this.header.duration_ms = global_playms;
-        let ticks = this.header.duration_tick - global_playtick;
-        if(this.header.ticks_per_beat){
-            let tevents = this.tempo_events.get_events();
+        this.header.durationTick = Math.max(...playtickArr);
+        this.header.durationMs = globalPlayms;
+        let ticks = this.header.durationTick - globalPlaytick;
+        if(this.header.ticksPerBeat){
+            let tevents = this.tempoEvents.getEvents();
             tevents = tevents[Math.max(...Object.keys(tevents))];
-            let last_tempo = tevents[tevents.length-1] ? tevents[tevents.length-1].tempo : 500000;
-            this.header.duration_ms += Math.round(last_tempo*(ticks/this.header.ticks_per_beat)/1000)+DURATION_TAIL_MS;
-            this.header.duration_tick += Math.round(DURATION_TAIL_MS*1000/last_tempo*this.header.ticks_per_beat);
+            let lastTempo = tevents[tevents.length-1] ? tevents[tevents.length-1].tempo : 500000;
+            this.header.durationMs += Math.round(lastTempo*(ticks/this.header.ticksPerBeat)/1000)+DURATION_TAIL_MS;
+            this.header.durationTick += Math.round(DURATION_TAIL_MS*1000/lastTempo*this.header.ticksPerBeat);
         }else{
-            this.header.duration_ms += Math.round(ticks*this.header.tick_resolution)+DURATION_TAIL_MS;
-            this.header.duration_tick += Math.round(DURATION_TAIL_MS*1000/this.header.tick_resolution);
+            this.header.durationMs += Math.round(ticks*this.header.tickResolution)+DURATION_TAIL_MS;
+            this.header.durationTick += Math.round(DURATION_TAIL_MS*1000/this.header.tickResolution);
         }
     }
 }
