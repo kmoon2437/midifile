@@ -1,6 +1,6 @@
 {
   "name": "@kmoon2437/midifile",
-  "version": "1.0.0-chuchu1",
+  "version": "2.0.0-chuchu1",
   "description": "midi/zk file parser",
   "main": "index.js",
   "scripts": {
