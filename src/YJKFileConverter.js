@@ -1,6 +1,6 @@
 const MidiFile = require('./MidiFile');
 const Consts = require('./Consts');
-const { BinaryXML } = require('zxe-binaryxml');
+const { BinaryXML } = require('yj-binaryxml');
 
 function trackname2portnum(name){
     if(!name) return 0;
@@ -55,8 +55,8 @@ function newEscapeEvent(dt,bytes){
     };
 }
 
-module.exports = class ZKFileConverter{
-    static midi2zk(midiBuf,compress = 'raw'){
+module.exports = class YJKFileConverter{
+    static midi2yjk(midiBuf,compress = 'raw'){
         let file = new MidiFile(midiBuf);
 
         let header = {
@@ -226,9 +226,9 @@ module.exports = class ZKFileConverter{
             }
         };*/
         
-        let zk = {
+        let yjk = {
             type:'element',
-            name:'zk',
+            name:'yjk',
             attributes:{
                 'xmlns:meta':'https://static.choyunjin.kr/xmlprefix/meta'
             },
@@ -236,7 +236,7 @@ module.exports = class ZKFileConverter{
         };
         
         // 헤더
-        zk.elements.push({
+        yjk.elements.push({
             type:'element',
             name:'header',
             elements:[{
@@ -320,14 +320,14 @@ module.exports = class ZKFileConverter{
             elements:[globalEl,dataEl]
         };
         
-        zk.elements.push(mididataEl);
+        yjk.elements.push(mididataEl);
         
         let xml = {
             declaration:{ attributes:{
                 version:'1.0',
                 encoding:'utf-8'
             } },
-            elements:[zk]
+            elements:[yjk]
         };
         
         return BinaryXML.fromParsedXML(xml,{ compress });

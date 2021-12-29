@@ -1,5 +1,5 @@
 {
-  "name": "zxe-midi-file",
+  "name": "@kmoon2437/midifile",
   "version": "1.0.0-chuchu1",
   "description": "midi/zk file parser",
   "main": "index.js",
@@ -7,24 +7,24 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "midi2zk": "./cli/midi2zk.js"
+    "midi2zk": "cli/midi2zk.js"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "commander": "^8.3.0",
     "midifile": "^2.0.0",
-    "zxe-binaryxml": "^1.0.0-arisa0"
+    "yj-binaryxml": "^1.0.0-arisa0"
   },
   "directories": {
     "test": "test"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kmoon2437/zxe-midi-file.git"
+    "url": "git+https://github.com/kmoon2437/midifile.git"
   },
   "bugs": {
-    "url": "https://github.com/kmoon2437/zxe-midi-file/issues"
+    "url": "https://github.com/kmoon2437/midifile/issues"
   },
-  "homepage": "https://github.com/kmoon2437/zxe-midi-file#readme"
+  "homepage": "https://github.com/kmoon2437/midifile#readme"
 }

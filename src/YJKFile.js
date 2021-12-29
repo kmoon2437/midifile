@@ -1,6 +1,6 @@
 const MidiTrack = require('./MidiTrack');
 const Consts = require('./Consts');
-const { BinaryXML } = require('zxe-binaryxml');
+const { BinaryXML } = require('yj-binaryxml');
 const fs = require('fs');
 //const { Validator:JSONSchemaValidator } = require('jsonschema');
 
@@ -84,9 +84,9 @@ function processEvent(e,d){
     if(s = processMidiSystemEvent(e,d)) return;
 }
 
-module.exports = class ZKFile{
+module.exports = class YJKFile{
     constructor(data,strict = false){
-        let zk = this.zk = BinaryXML.toParsedXML(data);
+        let yjk = this.yjk = BinaryXML.toParsedXML(data);
         //if(strict && validator.validate(zk,zk_schema)) throw new TypeError('Validation failed');
         
         // 우선 다루기 편하게 변환
@@ -94,12 +94,12 @@ module.exports = class ZKFile{
             attributes:header
         },globalEl,dataEl] } = zk;*/
         
-        let { elements:zkEls } = zk;
-        let zkEl = zkEls.filter(el => {
-            return el.type == 'element' && el.name == 'zk';
+        let { elements:yjkEls } = yjk;
+        let yjkEl = yjkEls.filter(el => {
+            return el.type == 'element' && el.name == 'yjk';
         })[0];
-        if(!zkEl) throw new Error('there is no "zk" element');
-        let header = zkEl.elements.filter(el => {
+        if(!yjkEl) throw new Error('there is no "yjk" element');
+        let header = yjkEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'header';
         });
         if(!header.length) throw new Error('there is no "header" element'); 
@@ -109,7 +109,7 @@ module.exports = class ZKFile{
         if(!header.length) throw new Error('there is no "midi" element in the "header" element');
         header = header[0].attributes;
         
-        let mididataEl = zkEl.elements.filter(el => {
+        let mididataEl = yjkEl.elements.filter(el => {
             return el.type == 'element' && el.name == 'mididata';
         })[0];
         if(!mididataEl) throw new Error('there is no "mididata" element');

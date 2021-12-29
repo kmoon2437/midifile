@@ -8,12 +8,12 @@
 3. d 태그는 map 구조의 데이터를 담는 태그로,
 js의 객체나 java의 Map 생각하면 편함
 -->
-<zk xmlns:meta="https://static.choyunjin.kr/xmlprefix/meta">
+<yjk xmlns:meta="https://static.choyunjin.kr/xmlprefix/meta">
     <!-- 파일 전체의 정보를 담음 -->
     <header>
-        <!-- 기존 zxel 파일의 헤더
+        <!-- 기존 yjkl 파일의 헤더
         곡정보,가사 설정 등 -->
-        <zxel
+        <yjkl
         title="테스트곡"
         singer="테스트가수"
         meta-layout="7"
@@ -155,10 +155,10 @@ js의 객체나 java의 Map 생각하면 편함
             </block>
         </data>
     </mididata>
-    <!-- zxel 파일과 호환되는 구조의 가사 데이터 -->
-    <zxel-lyrics>
+    <!-- yjkl 파일과 호환되는 구조의 가사 데이터 -->
+    <yjkl-lyrics>
         <!-- c는 code,d는 data(둘다 문자열) -->
         <cmd c="c" d="bpm 189" />
         <cmd c="t" d="겋헣헣헣허" />
-    </zxel-lyrics>
-</zk>
+    </yjkl-lyrics>
+</yjk>
