@@ -1,7 +1,7 @@
 {
   "name": "@kmoon2437/midifile",
   "version": "2.0.0-chuchu1",
-  "description": "midi/zk file parser",
+  "description": "midi/yjk file parser",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
