@@ -1,6 +1,6 @@
 {
   "name": "@kmoon2437/midifile",
-  "version": "2.0.1-chuchu0",
+  "version": "2.1.0-chuchu0",
   "description": "midi/yjk file parser",
   "main": "index.js",
   "scripts": {
